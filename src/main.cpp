@@ -1,6 +1,7 @@
 #include <X11/Xlib.h>
 #include <vector>
 #include <iostream>
+#include <limits>
 
 #include "../include/window.hpp"
 #include "../include/sphere.h"
@@ -11,33 +12,22 @@
 
 //Globals
 float gravity = 0.5;
-
+#include <limits>
 struct PressedKeys{
   bool r;
 };
 
 //Functions
 void key_manager(Display *display, PressedKeys *pressedKeys);
+float input_value(const char* prompt, float min, float max);
 
 int main(){
 
-  std::cout << "Insert gravity(double): ";
-  std::cin >> gravity;
+  gravity = input_value("Insert gravity", 0.0, 20.0);
 
-  if(std::cin.fail()){
-    std::cout << "Input not valid\n";
-    exit(-1);
-  }
 
-  float sphere_el = 0.7;
+  float sphere_el = input_value("Insert el", 0.0, 20.0);
   
-  std::cout << "Insert sphere elastic(double): ";
-  std::cin >> sphere_el;
-
-  if(std::cin.fail()){
-    std::cout << "Input not valid\n";
-    exit(-1);
-  }
 
   AppContext context = initWindow();
   Display *display = context.display;
@@ -111,4 +101,37 @@ void key_manager(Display *display, PressedKeys *pressedKeys){
     }
   }
 }
+
+
+float input_value(const char* prompt, float min, float max) {
+    float value;
+    while(true) {
+        std::cout << prompt << " [" << min << "-" << max << "]: ";
+        std::cin >> value;
+
+        if(std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Input non valido. Inserisci un numero.\n";
+            continue;
+        }
+
+        if(std::cin.peek() != '\n') {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Input contiene caratteri non numerici. Riprova.\n";
+            continue;
+        }
+
+        if(value < min || value > max) {
+            std::cout << "Il valore deve essere tra " << min << " e " << max << ".\n";
+            continue;
+        }
+
+        break;
+    }
+
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    return value;
+}
+
 
